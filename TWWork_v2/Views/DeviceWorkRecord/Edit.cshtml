@@ -1,0 +1,153 @@
+﻿@using TWWork_v2.Enums
+@model TWWork_v2.ViewModels.DeviceWorkRecordViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+   <meta charset="utf-8" />
+       <title></title>
+       <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<form class="layui-form" action="">
+     <div class="layui-form-item">
+            <label class="layui-form-label">ID</label>
+         <div class="layui-input-block">
+             <input asp-for="ID" name="id" lay-verify="required" id="id"
+                    lay-filter="id" lay-search="" readonly="readonly">
+         </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">设备名</label>
+        <div class="layui-input-block">
+            <select asp-for="DeviceName" name="deviceName" lay-verify="required" id="deviceName"
+                    lay-filter="deviceName" lay-search="" asp-items="Html.GetEnumSelectList<DeviceEnum>()"></select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">产线</label>
+        <div class="layui-input-inline">
+            <select asp-for="ProductionLine" id="productionLine"
+                    lay-verify="required" lay-filter="productionLine" lay-search="">
+                <option value="">--请选择产线--</option>
+            </select>
+        </div>
+        @* <div class="layui-form-mid layui-word-aux">辅助文字</div> *@
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">站点</label>
+        <div class="layui-input-block">
+            <select asp-for="StationName" name="rfidStation" id="stationName"
+                    lay-filter="rfidStation" asp-items="Html.GetEnumSelectList<RFIDStationNameEnum>()"></select>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">描述</label>
+        <div class="layui-input-block">
+            <textarea asp-for="Description" name="description" id="description" placeholder="请输入内容" class="layui-textarea"></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">提交时间</label>
+        <div class="layui-input-inline">
+            <input asp-for="CreateDate" class="layui-input" id="createDate" type="text" placeholder="开始时间" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">提交者</label>
+        <div class="layui-input-block">
+            <input asp-for="SubmitPerson" type="text" name="submitPerson" id="submitPerson" required lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    @* <div class="layui-form-item"> *@
+    @*   <div class="layui-input-block"> *@
+    @*     <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button> *@
+    @*     <button type="reset" class="layui-btn layui-btn-primary">重置</button> *@
+    @*   </div> *@
+    @* </div> *@
+</form>
+      
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+<script>
+
+ layui.use('laydate', function () {
+        var laydate = layui.laydate;
+                
+        laydate.render({
+            elem: '#createDate',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss',
+            trigger : 'click'
+        });
+        
+    });
+ 
+ 
+     //Demo
+     layui.use('form', function(){
+       var form = layui.form,$ = layui.jquery;
+      
+      form.on('select(deviceName)', function(data){
+           //data.value 得到被选中的值
+           console.log("deviceName"+ data);
+           var url = '/DeviceWorkRecord/LoadProductionLineInfo?deviceName=' + data.value;
+           $.get(url,function(data){
+              $("#productionLine").empty();
+              $("#productionLine").append(new Option("--请选择产线--",""));
+              $.each(data,function(index,item){
+                  $("#productionLine").append(new Option(item,item));
+                  console.log(index,item);
+              });
+              layui.form.render("select");
+           });
+
+      });
+      
+      $(function(){
+            console.log("$$$");
+            $.ajax({
+            url: '/DeviceWorkRecord/LoadProductionLineInfo'
+            ,data : {
+                deviceName : $('#deviceName option:selected').val() //选中的值
+            }
+            ,success: function(data){
+                $("#productionLine").empty();
+                $("#productionLine").append(new Option("--请选择产线--",""));
+                $.each(data,function(index,item){
+                    $("#productionLine").append(new Option(item,item));
+                    console.log(index,item);
+                });
+                $('#productionLine').val('@Model.ProductionLine');
+                layui.form.render("select");
+            }
+        });
+        });
+       //监听提交
+       form.on('submit(formDemo)', function(data){
+         layer.msg(JSON.stringify(data.field));
+         return false;
+       });
+     });
+     
+     var callbackdata = function () {
+           var data = {
+                id :$("#id").val(),
+                deviceName : $("#deviceName").val(),
+                productionLine : $('#productionLine').val(),
+                stationName : $('#stationName').val(),
+                description : $('#description').val(),
+                createDate :$('#createDate').val(),
+                submitPerson : $('#submitPerson').val()
+            };
+            return data;
+        };
+     </script>
+</body>
+</html>

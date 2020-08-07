@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>通威数据统计</title>
+	<link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<div class="layui-header">
+			<div class="layui-logo">通威数据统计（内部使用）</div>
+			@*<div class="layui-nav-title">通威数据统计（内部使用）</div>*@
+
+			<!-- 头部区域（可配合layui已有的水平导航） -->
+			@*	
+			<ul class="layui-nav layui-layout-left">
+				<li class="layui-nav-item"><a href="">商品管理</a></li>
+				<li class="layui-nav-item"><a href="">用户</a></li>
+				<li class="layui-nav-item">
+					<a href="javascript:;">其它系统</a>
+					<dl class="layui-nav-child">
+						<dd><a href="">邮件管理</a></dd>
+						<dd><a href="">消息管理</a></dd>
+						<dd><a href="">授权管理</a></dd>
+					</dl>
+				</li>
+			</ul>
+
+			<ul class="layui-nav layui-layout-right">
+				<li class="layui-nav-item">
+					<a href="javascript:;">
+						<img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+						贤心
+					</a>
+					<dl class="layui-nav-child">
+						<dd><a href="">基本资料</a></dd>
+						<dd><a href="">安全设置</a></dd>
+					</dl>
+				</li>
+				<li class="layui-nav-item"><a href="">退了</a></li>
+			</ul>
+			*@
+		</div>
+
+		<div class="layui-side layui-bg-black">
+			<div class="layui-side-scroll">
+				<!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+				<ul class="layui-nav layui-nav-tree" lay-filter="test">
+					<li class="layui-nav-item layui-nav-itemed">
+						<a class="" href="javascript:;">光电与RFID</a>
+						<dl class="layui-nav-child">
+							<dd class="layui-this"><a a href="javascript:;" data-url="ComparedStatistics/IndexNoLayout" data-id="11" data-title="对比统计" class="site-demo-active" data-type="tabAdd">对比统计</a></dd>
+							<dd><a a href="javascript:;" data-url="NewComparedStatistics/Index" data-id="22" data-title="对比统计(新sql)" class="site-demo-active" data-type="tabAdd">对比统计(新sql)</a></dd>
+							<dd><a a href="javascript:;" data-url="DetailedSiteComparison/Index" data-id="33" data-title="站点详细对比" class="site-demo-active" data-type="tabAdd">站点详细对比</a></dd>
+							<dd><a href="javascript:;" data-url="SiteDetails/Index" data-id="44" data-title="指定站点信息" class="site-demo-active" data-type="tabAdd">指定站点信息</a></dd>
+							<dd><a href="javascript:;" data-url="SuccessRateStatistics/Index" data-id="55" data-title="成功率统计" class="site-demo-active" data-type="tabAdd">成功率统计</a></dd>
+							<dd><a href="javascript:;" data-url="RFIDSiteReadQuality/Index" data-id="66" data-title="读取质量统计" class="site-demo-active" data-type="tabAdd">读取质量统计</a></dd>
+							<dd><a href="javascript:;" data-url="MissingRecord/Index" data-id="77" data-title="漏读记录" class="site-demo-active" data-type="tabAdd">漏读记录</a></dd>
+							<dd><a href="javascript:;" data-url="RFIDReadCounts/Index" data-id="88" data-title="RFID过站读取次数统计表" class="site-demo-active" data-type="tabAdd">RFID过站读取次数统计表</a></dd>
+							<dd><a href="javascript:;" data-url="InOutCompareData/Index" data-id="99" data-title="进出口RFID对比" class="site-demo-active" data-type="tabAdd">进出口RFID对比</a></dd>
+							<dd><a href="javascript:;" data-url="RetrospectiveInquiry/Index" data-id="140" data-title="进出口RFID对比" class="site-demo-active" data-type="tabAdd">追溯查询</a></dd>
+							<dd><a href="javascript:;" data-url="PowerOnAndOff/Index" data-id="140" data-title="通断电情况" class="site-demo-active" data-type="tabAdd">通断电情况</a></dd>
+						@* 	<dd><a href="javascript:;" data-url="NewDataChange/Index" data-id="100" data-title="数据读取状况变化" class="site-demo-active" data-type="tabAdd">数据读取状况变化</a></dd> *@
+						 </dl> 
+					</li>
+					@*<li class="layui-nav-item">
+						<a href="javascript:;">解决方案</a>
+						<dl class="layui-nav-child">
+							<dd><a href="javascript:;">列表一</a></dd>
+							<dd><a href="javascript:;">列表二</a></dd>
+							<dd><a href="">超链接</a></dd>
+						</dl>
+					</li>*@
+					<li class="layui-nav-item">
+						<a href="javascript:;">设备维修记录和表信息</a>
+						<dl class="layui-nav-child">
+                        	<dd><a href="javascript:;" data-url="DeviceWorkRecord/Index" data-id="120" data-title="设备维修记录" class="site-demo-active" data-type="tabAdd">设备维修记录</a></dd>
+                        	<dd><a href="javascript:;" data-url="TableInfo/Index" data-id="130" data-title="表信息" class="site-demo-active" data-type="tabAdd">表信息</a></dd>
+                        	@* <dd><a href="javascript:;">列表二</a></dd> *@
+                        	@* <dd><a href="">超链接</a></dd> *@
+                        </dl>
+					</li>
+					<li class="layui-nav-item">
+						<a href="javascript:;">Comtrol模块log文件</a>
+						<dl class="layui-nav-child">
+							<dd><a href="javascript:;" data-url="ComtrolLog/Index" data-id="120" data-title="Comtrol模块的Log下载" class="site-demo-active" data-type="tabAdd">Comtrol模块的Log下载</a></dd>
+                                              	
+                        </dl>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="layui-body">
+			<!-- 内容主体区域 -->
+			@*<div style="padding: 15px;">内容主体区域</div>*@
+			<!--页面标签-->
+			<div class="layui-tab" lay-filter="demo" lay-allowclose="true">
+				<ul class="layui-tab-title">
+					<li class="layui-this" lay-id="111">对比统计</li>
+					@*<li lay-id="22">用户管理</li>
+					<li lay-id="33">权限分配</li>
+					<li lay-id="44">商品管理</li>
+					<li lay-id="55">订单管理</li>*@
+				</ul>
+				<div class="layui-tab-content">
+					<div class="layui-tab-item layui-show">
+						<iframe scrolling="yes" frameborder="0" src="ComparedStatistics/IndexNoLayout" width="100%" height="100%"></iframe>
+					</div>
+					@*<div class="layui-tab-item">内容2</div>
+					<div class="layui-tab-item">内容3</div>
+					<div class="layui-tab-item">内容4</div>
+					<div class="layui-tab-item">内容5</div>*@
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-footer">
+			<!-- 底部固定区域 -->
+			© layui.com - 底部固定区域
+		</div>
+	</div>
+	<script src="~/lib/jquery/dist/jquery.js"></script>
+	<script src="~/lib/layui/layui.js"></script>
+
+	<script>
+		//JavaScript代码区域
+		layui.use('element', function () {
+			var $ = layui.jquery
+				, element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+
+			//触发事件
+			var active = {
+				tabAdd: function (url, id, name) {
+					console.log(url);
+					//新增一个Tab项 
+					element.tabAdd('demo', {
+						title: name
+						, content: '<iframe   scrolling="yes" frameborder="0" src="'
+							+ url
+							+ '" width="100%" height="100%"></iframe>'// 支持传入html
+						, id: id//实际使用一般是规定好的id，这里以时间戳模拟下
+						//, id: new Date().getTime() //实际使用一般是规定好的id，这里以时间戳模拟下
+					});
+					FrameWH()
+				}
+				, tabDelete: function (othis) {
+					//删除指定Tab项
+					element.tabDelete('demo', '44'); //删除：“商品管理”
+
+
+					othis.addClass('layui-btn-disabled');
+				}
+				, tabChange: function (id) {
+					//切换到指定Tab项
+					element.tabChange('demo', id); //切换到：用户管理
+				}
+			};
+
+			$('.site-demo-active').on('click', function () {
+				var othis = $(this), type = othis.data('type');
+				//active[type] ? active[type].call(this, othis) : '';
+				active.tabAdd(othis.attr("data-url"), othis.attr("data-id"), othis.attr("data-title"));
+				active.tabChange(othis.attr("data-id"));
+			});
+
+			//Hash地址的定位
+			var layid = location.hash.replace(/^#test=/, '');
+			element.tabChange('test', layid);
+
+			element.on('tab(test)', function (elem) {
+				location.hash = 'test=' + $(this).attr('lay-id');
+			});
+
+			function FrameWH() {
+                var h = $(window).height() -41- 10 - 60 -10-44 -10;
+                $("iframe").css("height",h+"px");
+            }
+
+            $(window).resize(function () {
+                FrameWH();
+            })
+		});
+	</script>
+	@RenderSection("Scripts", required: false)
+</body>
+</html>

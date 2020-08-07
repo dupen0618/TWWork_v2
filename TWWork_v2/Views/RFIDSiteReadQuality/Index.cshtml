@@ -1,0 +1,145 @@
+﻿@using TWWork_v2.Enums
+@model TWWork_v2.ViewModels.RFIDSiteReadQualityViewModel
+
+@{
+	Layout = null;
+	ViewData["Title"] = "指定站点的详细信息";
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<form class="layui-form" asp-controller="RFIDSiteReadQuality">
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label class="layui-form-label">条件</label>
+		</div>
+		<div class="layui-inline">
+			<div class="layui-input-inline">
+				<input asp-for="DateMin" class="layui-input" id="dateMin" type="text" placeholder="开始时间" autocomplete="off">
+			</div>
+			<div class="layui-input-inline">
+				<input asp-for="DateMax" class="layui-input" id="dateMax" type="text" placeholder="结束时间" autocomplete="off">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<input class="layui-btn layui-btn-primary" type="submit" asp-action="Index" value="查询"/>
+		</div>
+		<div class="layui-inline">
+			<input class="layui-btn layui-btn-primary" type="button" id="export" value="导出"/>
+		</div>
+	</div>
+</form>
+<table class="layui-hide" id="test"></table>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+<script src="~/lib/layui/layui_exts/excel.js"></script>
+
+<script>
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+                
+        laydate.render({
+            elem: '#dateMin',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+        laydate.render({
+            elem: '#dateMax',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+    });
+    
+    layui.use('table', function () {
+    	var table = layui.table;
+
+    	table.render({
+            elem: '#test'
+            ,id : 'exportTable'
+            ,title: 'RFID站点读取质量统计'
+            , url: '/RFIDSiteReadQuality/LoadData'
+            , where:{
+                dateMin : '@Model.DateMin',
+                dateMax: '@Model.DateMax' 
+            }
+            //, cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , cols: [[
+                { field: 'no', title: '编号', sort: true }
+                , { field: 'craftName', title: '工序', sort: true }
+                , { field: 'deviceName', title: '设备' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , { field: 'rfidStation', title: 'RFID站点', sort: true }
+                , { field: 'readCount', title: '读取数' }
+                , { field: 'rfidNum', title: 'RFID数量' }
+                , { field: 'avarageRead', title: '平均读取', align: 'center' } //单元格内容水平居中
+                , { field: 'weakReadCount', title: '扫描数量<4', align: 'center' } //单元格内容水平居中
+            ]]
+            , page: true
+        });
+        @*
+         $('#export').on('click',function() {
+            $.ajax({
+                url:"/RFIDSiteReadQuality/ExportFile",
+                type: 'post',
+                data:{
+                     dateMin : '@Model.DateMin',
+                     dateMax: '@Model.DateMax' 
+                },
+                async:false,
+                dataType: 'json',
+                success:function(res) {       
+                  table.exportFile('exportTable',res,'xlsx');
+                }
+            });
+        });
+        *@
+    });
+    layui.use(['jquery', 'excel', 'layer'], function() {
+                var $ = layui.jquery;
+                var excel = layui.excel;
+                $('#export').on('click', function(){
+                	$.ajax({
+        				url: '/RFIDSiteReadQuality/ExportFile'
+        				,dataType: 'json'
+        				,data:{
+        					  dateMin : '@Model.DateMin',
+                              dateMax: '@Model.DateMax' 
+        				},
+        				success: function(res) {
+        					// 假如返回的 res.data 是需要导出的列表数据
+        					//console.log(res.data);// [{name: 'wang', age: 18, sex: '男'}, {name: 'layui', age: 3, sex: '女'}]
+        					// 1. 数组头部新增表头
+        					res.unshift(
+        							{
+        								no: '编号'
+                                        , craftName: '工序'
+                                        , deviceName: '设备'
+                                        , rfidStation: 'RFID站点'
+                                        , readCount: '读取数' 
+                                        , rfidNum: 'RFID数量' 
+                                        , avarageRead: '平均读取'
+                                        , weakReadCount: '扫描数量<4'
+        							});
+        					// 2. 如果需要调整顺序，请执行梳理函数
+        					// var data = excel.filterExportData(res.data, [
+        					// 	'name',
+        					// 	'sex',
+        					// 	'age',
+        					// ]);
+        					// 3. 执行导出函数，系统会弹出弹框
+        					excel.exportExcel({
+        						sheet1: res
+        					}, 'RFID站点读取质量统计.xlsx', 'xlsx');
+        				}
+        			});
+                });
+                
+            });
+</script>
+</body>
+</html>

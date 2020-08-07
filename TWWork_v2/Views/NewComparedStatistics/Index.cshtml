@@ -1,0 +1,265 @@
+﻿@model TWWork_v2.ViewModels.NewComparedStatisticsViewModel;
+
+@{
+	Layout = null;
+	ViewData["Title"] = "对比统计（新sql）";
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<form class="layui-form" asp-controller="NewComparedStatistics">
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label class="layui-form-label">条件</label>
+		</div>
+		<div class="layui-inline">
+			<div class="layui-input-inline">
+				<input asp-for="DateMin" class="layui-input" id="dateMin" type="text" placeholder="开始时间" autocomplete="off">
+			</div>
+			<div class="layui-input-inline">
+				<input asp-for="DateMax" class="layui-input" id="dateMax" type="text" placeholder="结束时间" autocomplete="off">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<input class="layui-btn layui-btn-primary" type="submit" asp-action="Index" value="查询"/>
+		</div>
+		<div class="layui-inline">
+			<input class="layui-btn layui-btn-primary" type="button" id="export" value="导出"/>
+		</div>
+	</div>
+</form>
+<table class="layui-hide" id="test"></table>
+@*
+<table lay-filter="demo">
+	<thead>
+	<tr>
+		<th lay-data="{ field: 'CraftName', title: '机台' }">机台</th>
+		<th lay-data="{ field: 'DeviceName', title: '设备名', sort: true }">设备名</th>
+		<th lay-data="{ field: 'RFIDStationName', title: '站点' }">站点</th>
+		<th lay-data="{ field: 'Time', title: '日期' }">日期</th>
+		<th lay-data="{ field: 'RFIDCnt', title: 'RFID计数', align: 'center' }">RFID计数</th>
+		<th lay-data="{ field: 'MissCnt', title: '漏读数', sort: true, align: 'right' }">漏读数</th>
+		<th lay-data="{ field: 'SuccessPercenter', title: '成功率', sort: true, align: 'right' }">成功率</th>
+	</tr> 
+	</thead>
+	<tbody>
+	@foreach (var item in Model.DataChangeModels)
+	{
+		<tr>
+			<td>@item.CraftName</td>
+			<td>@item.DeviceName</td>
+			<td>@item.RFIDStationName</td>
+			<td>@item.Time</td>
+			<td>@item.RFIDCnt</td>
+			<td>@item.MissCnt</td>
+			<td>@item.SuccessPercenter</td>
+		</tr>
+	}
+	</tbody>
+</table>
+*@
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+<script src="~/lib/layui/layui_exts/excel.js"></script>
+
+<script>
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#dateMin',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+        laydate.render({
+            elem: '#dateMax',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+    });
+    
+    layui.use('table', function () {
+    	var table = layui.table;
+        //转换静态表格
+        @*
+        table.init('demo', {
+          cellMinWidth: 80 //设置高度
+          ,limit: 10 //注意：请务必确保 limit 参数（默认：10）是与你服务端限定的数据条数一致
+          ,page :true
+          , id: 'exportTable'
+          , title: '光电与RFID的统计对比(新sql)'
+        }); 
+        *@
+        
+        table.render({
+            elem: '#test'
+            , url: '/NewComparedStatistics/LoadData'
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , id: 'exportTable'
+            , title: '光电与RFID的统计对比(新sql)'
+            , where:{
+                dateMin:'@Model.DateMin',
+                dateMax:'@Model.DateMax'
+                   }
+            , cols: [[
+                { field: 'no', title: '编号' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , { field: 'craftName', title: '机台' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , { field: 'deviceName', title: '设备名', sort: true }
+                , { field: 'rfidName', title: '站点' }
+                , { field: 'obtCnt', title: '光电数量' }
+                , { field: 'obtWithoutRfid', title: '有光电没有RFID' }
+                , { field: 'obtShortImpuls', title: '光电短触发' }
+                , { field: 'rfidWithoutOBT', title: '有RFID没有光电' }
+                , { field: 'rfidCnt', title: 'RFID计数', align: 'center' } //单元格内容水平居中
+                , { field: 'cntDiff', title: '计数差异', align: 'center' } //单元格内容水平居中
+                , { field: 'missCnt', title: '漏读数', sort: true, align: 'right' } //单元格内容水平居中
+                , { field: 'successPercenter', title: '成功率', sort: true, align: 'right' }
+            ]]
+            ,page:true
+        });
+		@*
+         $('#export').on('click',function() {
+            console.log("hello");
+            $.ajax({
+                url:"/NewComparedStatistics/ExportFile",
+                type: 'post',
+                data:{
+                    dateMin:'@Model.DateMin',
+                    dateMax:'@Model.DateMax'
+                },
+                async:false,
+                dataType: 'json',
+                success:function(res) {
+                  table.exportFile('exportTable',res,'xlsx');
+                }
+            });
+         });
+         *@
+    });
+    
+    layui.use(['jquery', 'excel', 'layer'], function() {
+        var $ = layui.jquery;
+        var excel = layui.excel;
+        $('#export').on('click', function(){
+        	$.ajax({
+				url: '/NewComparedStatistics/ExportFile'
+				,dataType: 'json'
+				,data:{
+					 dateMin:'@Model.DateMin',
+					 dateMax:'@Model.DateMax'
+				},
+				success: function(res) {
+					// 假如返回的 res.data 是需要导出的列表数据
+					//console.log(res.data);// [{name: 'wang', age: 18, sex: '男'}, {name: 'layui', age: 3, sex: '女'}]
+					// 1. 数组头部新增表头
+					res.unshift(
+							{
+								no: '编号',
+								craftName: '机台',
+								 deviceName: '设备名', 
+                                 rfidName: '站点' 
+                                 , obtCnt: '光电数量' 
+                                 , obtWithoutRfid: '有光电没有RFID' 
+                                 , obtShortImpuls: '光电短触发' 
+                                 , rfidWithoutOBT: '有RFID没有光电' 
+                                 , rfidCnt: 'RFID计数'
+                                 , cntDiff: '计数差异'
+                                 , missCnt: '漏读数'
+                                 , successPercenter: '成功率'
+							});
+					// 2. 如果需要调整顺序，请执行梳理函数
+					// var data = excel.filterExportData(res.data, [
+					// 	'name',
+					// 	'sex',
+					// 	'age',
+					// ]);
+					// 3. 执行导出函数，系统会弹出弹框
+					excel.exportExcel({
+						sheet1: res
+					}, '光电与RFID的统计对比(新sql).xlsx', 'xlsx');
+				}
+			});
+        });
+        
+    });
+    @*
+    layui.config({//配置并导入excel插件
+        base: '/lib/layui/layui_exts/'}).use(['excel', 'layer'], function() {
+            var $ = layui.$;
+            var layer = layui.layer;
+            var excel = layui.excel;
+            $('#export').on('click', function(){
+                // 模拟从后端接口读取需要导出的数据
+                $.ajax({
+                    url: '/NewComparedStatistics/ExportFile'
+                    ,dataType: 'json'
+                    ,data:{
+                         dateMin:'@Model.DateMin',
+                         dateMax:'@Model.DateMax'
+                    }
+                    ,success(res) {
+                        var data = res;
+                        console.log(res);
+                        // 重点！！！如果后端给的数据顺序和映射关系不对，请执行梳理函数后导出
+                        data = excel.filterExportData(data, [
+                            'CraftName'
+                            ,'DeviceName'
+                            ,'MissCnt'
+                            ,'RFIDCnt'
+                            ,'RFIDStationName'
+                            ,'SuccessPercenter'
+                            ,'Time'
+                        ]);
+                        // 重点2！！！一般都需要加一个表头，表头的键名顺序需要与最终导出的数据一致
+                        data.unshift(
+                            { CraftName: "机台"
+                                , DeviceName: "设备名"
+                                ,RFIDStationName: '站点'
+                                , Time: "日期"
+                                ,RFIDCnt: "RFID计数"
+                                ,MissCnt: '漏读数'
+                                , SuccessPercenter: "成功率"
+                            });
+
+                        var timestart = Date.now();
+                        excel.exportExcel(data, '光电与RFID的统计对比(新sql)--'+timestart+'.xlsx', 'xlsx');
+                        //	var timeend = Date.now();
+
+                        //	var spent = (timeend - timestart) / 1000;
+                        //	layer.alert('单纯导出耗时 '+spent+' s');
+                        }
+                        ,error() {
+                            layer.alert('获取数据失败，请检查是否部署在本地服务器环境下');
+                        }
+                    });
+                  }); 	
+                });
+                *@
+    //导出事件
+	@*
+	$('#export').on('click',function () {
+		//使用ajax请求获取所有数据
+		$.ajax({
+			url: "/NewComparedStatistics/ExportFile",
+			type: 'post',
+			data: {
+				dateMin: @Model.DateMin,
+				dateMax: @Model.DateMax
+			},
+			async: false,
+			dataType: 'json',
+			success: function (res) {
+				//使用table.exportFile()导出数据
+				table.exportFile('exportTable', res.data, 'xlsx');
+			}
+		});
+	});
+	*@
+</script>
+</body>
+</html>

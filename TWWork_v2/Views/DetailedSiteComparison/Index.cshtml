@@ -1,0 +1,243 @@
+﻿@using TWWork_v2.Enums
+@model TWWork_v2.ViewModels.DetailedSiteComparisonViewModel
+
+@{
+	Layout = null;
+	ViewData["Title"] = "站点详细对比";
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<form class="layui-form" asp-controller="DetailedSiteComparison">
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label class="layui-form-label">条件</label>
+		</div>
+		<div class="layui-inline">
+			<div class="layui-input-inline">
+				<input asp-for="DateMin" class="layui-input" id="dateMin" type="text" placeholder="开始时间" autocomplete="off">
+			</div>
+			<div class="layui-input-inline">
+				<input asp-for="DateMax" class="layui-input" id="dateMax" type="text" placeholder="结束时间" autocomplete="off">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<div class="layui-input-inline">
+				<select asp-for="DeviceName" name="deviceName" lay-verify="required" id="deviceName"
+				        lay-filter="deviceName" lay-search="" asp-items="Html.GetEnumSelectList<DeviceEnum>()"></select>
+			</div>
+			<div class="layui-input-inline">
+				<select asp-for="ProductionLine" id="productionLine" 
+				        lay-verify="required" lay-filter="productionLine" lay-search="">
+            		<option value="">--请选择产线--</option>
+            	</select>
+            </div>
+			<div class="layui-input-inline">
+				<select asp-for="ObtStation" name="obtStation" 
+				        lay-filter="obtStation" asp-items="Html.GetEnumSelectList<OBTStationNameEnum>()"></select>
+			</div>
+			<div class="layui-input-inline">
+				<select asp-for="RfidStation" name="rfidStation" 
+				        lay-filter="rfidStation" asp-items="Html.GetEnumSelectList<RFIDStationNameEnum>()"></select>
+            </div>
+		</div>
+		<div class="layui-inline">
+			<input class="layui-btn layui-btn-primary" type="submit" asp-action="Index" value="查询"/>
+		</div>
+		<div class="layui-inline">
+			<input class="layui-btn layui-btn-primary" type="button" id="export" value="导出"/>
+		</div>
+	</div>
+</form>
+<table class="layui-hide" id="test"></table>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+<script src="~/lib/layui/layui_exts/excel.js"></script>
+
+<script>
+    layui.use('laydate', function () {
+        var laydate = layui.laydate;
+                
+        laydate.render({
+            elem: '#dateMin',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+        laydate.render({
+            elem: '#dateMax',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+    });
+    
+    layui.use('table', function () {
+    	var table = layui.table,$ = layui.jquery;
+
+    	table.render({
+            elem: '#test'
+            ,id : 'exportTable'
+            ,title: '光电与RFID详细对比'
+            , url: '/DetailedSiteComparison/LoadData'
+            , where:{
+                dateMin : '@Model.DateMin',
+                dateMax: '@Model.DateMax' ,
+                deviceName : '@Model.DeviceName', 
+                productionLine: '@Model.ProductionLine',
+                obtStation : '@Model.ObtStation', 
+                rfidStation : '@Model.RfidStation'
+            }
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , cols: [[
+                { field: 'no', title: '编号', sort: true }
+                , { field: 'obtDeviceName', title: '光电设备名称', sort: true }
+                , { field: 'obtStationName', title: '光电站点名称' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , { field: 'upTime', title: '光电上升沿时间', sort: true }
+                , { field: 'downTime', title: '光电下降沿时间' }
+                , { field: 'obtOnTimespan', title: '光电时间间隔' }
+                , { field: 'rfidDeviceName', title: 'RFID设备名称', align: 'center' } //单元格内容水平居中
+                , { field: 'rfidBoxId', title: 'RFID BoxId', sort: true, align: 'right' } //单元格内容水平居中
+                , { field: 'rfidStationName', title: 'RFID站点名称', sort: true, align: 'right' }
+                , { field: 'createDate', title: 'RFID创建时间', sort: true, align: 'right' }
+            ]]
+            , page: true
+            , done:function(res, curr, count) {
+                console.log(res.data);
+                //merge(res);
+                //$('tr').css({'background-color': '#009688', 'color': '#fff'});//表头样式修改
+      
+                var that = this.elem.next();
+                console.log(this.elem);
+                console.log(that);
+                res.data.forEach(function (item, index) {
+                    var timestamp = item.obtOnTimespan
+                    if(!(typeof timestamp == "undefined" || timestamp == null || timestamp == "")){
+                        var str = item.obtOnTimespan.split(':');
+                        if (str[0] === "0" && str[1] === "0") {
+                            var tr = that.find(".layui-table-box tbody tr[data-index='" + index + "']");
+                            tr.css("background-color", "#90EE90");
+                            //tr.find(".laytable-cell-1-0-9").css("color","red");
+                        } 
+                    }
+                });
+            }
+        });
+        @*
+         $('#export').on('click',function() {
+            $.ajax({
+                url:"/DetailedSiteComparison/ExportFile",
+                type: 'post',
+                data:{
+                     dateMin : '@Model.DateMin',
+                     dateMax: '@Model.DateMax' ,
+                     deviceName : '@Model.DeviceName', 
+                     productionLine: '@Model.ProductionLine',
+                     obtStation : '@Model.ObtStation', 
+                     rfidStation : '@Model.RfidStation'
+                },
+                async:false,
+                dataType: 'json',
+                success:function(res) {
+                  table.exportFile('exportTable',res,'xlsx');
+                }
+            });
+        });
+        *@
+    });
+    
+    layui.use(['jquery', 'excel', 'layer'], function() {
+                    var $ = layui.jquery;
+                    var excel = layui.excel;
+                    $('#export').on('click', function(){
+                    	$.ajax({
+            				url: '/DetailedSiteComparison/ExportFile'
+            				,dataType: 'json'
+            				,data:{
+            					 dateMin : '@Model.DateMin',
+                                 dateMax: '@Model.DateMax' ,
+                                 deviceName : '@Model.DeviceName', 
+                                 productionLine: '@Model.ProductionLine',
+                                 obtStation : '@Model.ObtStation', 
+                                 rfidStation : '@Model.RfidStation'
+            				},
+            				success: function(res) {
+            					// 假如返回的 res.data 是需要导出的列表数据
+            					//console.log(res.data);// [{name: 'wang', age: 18, sex: '男'}, {name: 'layui', age: 3, sex: '女'}]
+            					// 1. 数组头部新增表头
+            					res.unshift(
+            							{
+            								no: '编号'
+                                            , obtDeviceName: '光电设备名称'
+                                            , obtStationName: '光电站点名称' 
+                                            , upTime: '光电上升沿时间'
+                                            , downTime: '光电下降沿时间' 
+                                            , obtOnTimespan: '光电时间间隔'
+                                            , rfidDeviceName: 'RFID设备名称'
+                                            , rfidBoxId: 'RFID BoxId'
+                                            , rfidStationName: 'RFID站点名称'
+                                            , createDate: 'RFID创建时间'
+            							});
+            					// 2. 如果需要调整顺序，请执行梳理函数
+            					// var data = excel.filterExportData(res.data, [
+            					// 	'name',
+            					// 	'sex',
+            					// 	'age',
+            					// ]);
+            					// 3. 执行导出函数，系统会弹出弹框
+            					excel.exportExcel({
+            						sheet1: res
+            					}, '光电与RFID详细对比.xlsx', 'xlsx');
+            				}
+            			});
+                    });
+                    
+                });
+    
+    layui.use("form",function() {
+      var form = layui.form
+      ,$ = layui.jquery;
+      
+      form.on('select(deviceName)', function(data){
+           //data.value 得到被选中的值
+           console.log("deviceName"+ data);
+           var url = '/DetailedSiteComparison/LoadProductionLineInfo?deviceName=' + data.value;
+           $.get(url,function(data){
+              $("#productionLine").empty();
+              $("#productionLine").append(new Option("--请选择产线--",""));
+              $.each(data,function(index,item){
+                  $("#productionLine").append(new Option(item,item));
+                  console.log(index,item);
+              });
+              layui.form.render("select");
+           });
+
+      });
+      
+      $(function(){
+            console.log("$$$");
+            $.ajax({
+            url: '/DetailedSiteComparison/LoadProductionLineInfo'
+            ,data : {
+                deviceName : $('#deviceName option:selected').val() //选中的值
+            }
+            ,success: function(data){
+                $("#productionLine").empty();
+                $("#productionLine").append(new Option("--请选择产线--",""));
+                $.each(data,function(index,item){
+                    $("#productionLine").append(new Option(item,item));
+                    console.log(index,item);
+                });
+                $('#productionLine').val('@Model.ProductionLine');
+                layui.form.render("select");
+            }
+        });
+        });
+    });
+</script>
+</body>
+</html>

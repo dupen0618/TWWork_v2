@@ -1,0 +1,41 @@
+﻿@{
+	Layout = null;
+	ViewData["Title"] = "每个表信息";
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<table class="layui-hide" id="test"></table>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+
+<script>
+    
+    layui.use('table', function () {
+    	var table = layui.table;
+
+    	table.render({
+            elem: '#test'
+            ,id : 'exportTable'
+            ,title: '每个表信息'
+            , url: '/TableInfo/LoadData'
+            //, cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , cols: [[
+                 { field: 'tableName', title: '表名称', sort: true }
+                , { field: 'size', title: '大小（MB）' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , { field: 'rowNum', title: '记录行数', sort: true }
+            ]]
+            , page: true
+        });
+        
+    });
+    
+</script>
+</body>
+</html>

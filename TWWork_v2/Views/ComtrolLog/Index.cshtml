@@ -1,0 +1,92 @@
+﻿@{
+	Layout = null;
+	ViewData["Title"] = "Comtrol模块的log下载";
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<div class="layui-btn-container">
+	<button class="layui-btn layui-btn-sm" type="button" lay-demo="download">下载</button>
+</div>
+ 
+<div class="demo-tree-more" id="test12"></div>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+
+<script>
+    $(this).ready(function(){
+         $.get("/ComtrolLog/GetData",function(LogData,status){
+             
+          // console.log(LogData);
+          // console.log(JSON.parse(LogData));
+           var logJson = JSON.parse(LogData);
+        
+    	
+    	layui.use(['tree', 'util'], function(){
+        var tree = layui.tree
+        ,layer = layui.layer
+        ,util = layui.util
+        
+        //模拟数据
+        ,data = logJson;
+       
+        //基本演示
+        tree.render({
+          elem: '#test12'
+          ,data: data
+          ,showCheckbox: true  //是否显示复选框
+          ,id: 'demoId1'
+          ,isJump: true //是否允许点击节点时弹出新窗口跳转
+          ,click: function(obj){
+            var data = obj.data;  //获取当前点击的节点数据
+            layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+          }
+        });
+        
+        //按钮事件
+        util.event('lay-demo', {
+          getChecked: function(othis){
+            var checkedData = tree.getChecked('demoId1'); //获取选中节点的数据
+            
+            layer.alert(JSON.stringify(checkedData), {shade:0});
+            console.log(checkedData);
+          }
+          ,setChecked: function(){
+            tree.setChecked('demoId1', [12, 16]); //勾选指定节点
+          }
+          ,reload: function(){
+            //重载实例
+            tree.reload('demoId1', {
+              
+            });
+            
+          }
+          ,download:function() {
+             var checkedData = tree.getChecked('demoId1'); //获取选中节点的数据
+             
+             $.post("/ComtrolLog/CompressionLogToZip",{list:checkedData},function(LogData,status){
+                 console.log(LogData);
+                 
+               if(status === 'success'){
+                   window.location.href = "@Url.Action("DownLoad")?file=" + LogData;
+               }
+             });
+            
+          }
+        });
+         
+        
+      });
+           
+    	 });
+         });
+    
+</script>
+</body>
+</html>

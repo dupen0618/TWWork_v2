@@ -1,0 +1,50 @@
+﻿@using TWWork_v2.Enums
+@model TWWork_v2.ViewModels.SuccessRateStatisticsViewModel
+
+@{
+	Layout = null;
+	ViewData["Title"] = "漏读记录";
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+<table class="layui-hide" id="test"></table>
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/layui/layui.js"></script>
+<script src="~/lib/layui/layui_exts/excel.js"></script>
+
+<script>
+    
+    layui.use('table', function () {
+    	var table = layui.table;
+
+    	table.render({
+            elem: '#test'
+            ,id : 'exportTable'
+            ,title: '成功率统计'
+            , url: '/MissingRecord/LoadData'
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , cols: [[
+                { field: 'no', title: '编号', sort: true }
+                , { field: 'craftName', title: '工序', sort: true }
+                , { field: 'deviceName', title: '设备名' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , { field: 'rfidStationName', title: '站点', sort: true }
+                , { field: 'obtUpTime', title: '上升沿时间' }
+                , { field: 'obtDownTime', title: '下降沿时间' }
+                , { field: 'onTimespan', title: '时间间隔', align: 'center' } //单元格内容水平居中
+                , { field: 'remark', title: '标记', align: 'center' } //单元格内容水平居中
+                , { field: 'createDate', title: '创建时间', align: 'center' } //单元格内容水平居中
+                , { field: 'pushOrPop', title: '出/入站', align: 'center' } //单元格内容水平居中
+            ]]
+            , page: true
+        });
+    });
+</script>
+</body>
+</html>
