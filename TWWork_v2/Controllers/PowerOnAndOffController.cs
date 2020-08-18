@@ -23,7 +23,7 @@ namespace TWWork_v2.Controllers
 			return View();
 		}
 
-		public IActionResult LoadData(string tag, string dateMin, string dateMax, string craftName
+		public IActionResult LoadData(string tag, string dateMin, string dateMax, string craftName, string productionLine
 			, int page, int limit)
 		{
 			if (tag == "0")
@@ -46,22 +46,23 @@ namespace TWWork_v2.Controllers
 			}
 			else
 			{
-				list = _repository.GetDev_TraceRecords(dateMin, dateMax, craftName);
+				list = _repository.GetDev_TraceRecords(dateMin, dateMax, $"{productionLine}-{craftName}01");
 			}
 
-			var q =
-				from p in list
-				group p by p.TRACEID into g
-				select new
-				{
-					g.Key,
-					NumProducts = g.Count()
-				};
+			var powerOnCount = list.Where(e => !string.IsNullOrEmpty(e.TRACEID) && string.Join("", e.TRACEID.TakeLast(6).ToArray()).StartsWith("A")).Count();
+			var powerOffCount = list.Where(e => !string.IsNullOrEmpty(e.TRACEID) && string.Join("", e.TRACEID.TakeLast(6).ToArray()).StartsWith("M")).Count();
+
+			var onOffCount = new
+			{
+				offCount = powerOffCount,
+				onCount = powerOnCount
+			};
 
 			var data = new
 			{
 				code = 0,
 				msg = "hello",
+				powerOnOffCount = onOffCount,
 				count = list.Count,
 				data = list.Skip((page - 1) * limit).Take(limit).ToList()
 			};

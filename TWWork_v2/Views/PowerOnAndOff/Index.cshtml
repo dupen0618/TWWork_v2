@@ -45,7 +45,7 @@
 				</div>
 			</div>
 			<div class="layui-inline">
-				<input class="layui-btn layui-btn-primary" v-on:click="searchData" value="查询" />
+				<input class="layui-btn layui-btn-primary" type="button" v-on:click="searchData" value="查询" />
 			</div>
 			@*<div class="layui-inline">
 					<input class="layui-btn layui-btn-primary" type="button" id="export" value="导出" />
@@ -124,6 +124,8 @@
 						default:
 							self.options = [{ text: '', value: '' }];
 					}
+					self.dateMin = $("#dateMin").val();
+					self.dateMax = $("#dateMax").val();
 					return self.options;
 				}
 			},
@@ -161,16 +163,26 @@
 					self.tableRender(self.table, 1);
 				},
 				dateRender: function (laydate, elems) {
+					var self = this;
 					for (i = 0; i < elems.length; i++) {
 						laydate.render({
 							elem: elems[i],
 							type: 'datetime',
-							format: 'yyyy-MM-dd HH:mm:ss'
+							format: 'yyyy-MM-dd HH:mm:ss',
+							done: (value) => {
+								if (elems[i] == "#dateMax")
+									self.dateMax = value;
+								else if (elems[i] == "#dateMin")
+									self.dateMin = value;
+							}
 						});
 					}
 				},
 				tableRender: function (table, tag) {
 					var self = this;
+					self.dateMin = $("#dateMin").val();
+					self.dateMax = $("#dateMax").val();
+					self.productionLine = $("#productionLine").val();
 					table.render({
 						elem: '#test'
 						, id: 'exportTable'
@@ -186,40 +198,53 @@
 						}
 						//, cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
 						, cols: [[
-							{ field: 'ID', title: 'ID', hide: true, sort: true }
-							, { field: 'boxID', title: '花篮编号', sort: true }
-							, { field: 'traceID', title: '追溯编号', sort: true }
-							, { field: 'craftName', title: '工艺名称' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+							{ field: 'id', title: 'ID', hide: true, sort: true }
+							, { field: 'boxid', title: '花篮编号', sort: true }
+							, { field: 'traceid', title: '追溯编号', sort: true }
+							, { field: 'craftname', title: '工艺名称' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
 							, { field: 'deviceName', title: '设备名称', sort: true }
-							, { field: 'rfidStationName', title: 'RFID', align: 'center' }
-							, { field: 'createDate', title: '过站时间' }
+							, { field: 'rfidstationname', title: 'RFID', align: 'center' }
+							, { field: 'createdate', title: '过站时间' }
 						]]
 						, page: true
 						, done: function (res, curr, count) {
+							if (res.data.length > 0) {
+								var powerOnOff = res.powerOnOffCount;
+								var powerOnCount = powerOnOff.onCount;
+								var powerOffCount = powerOnOff.offCount;
 
+								// 基于准备好的dom，初始化echarts实例
+								var myChart = echarts.init(document.getElementById('main'));
 
-							// 基于准备好的dom，初始化echarts实例
-							var myChart = echarts.init(document.getElementById('main'));
+								var option = myChart.setOption({
+									title: {
+										text: '通断对比图',
+										left: 'center',
+										top: 20,
+										textStyle: {
+											color: '#ccc'
+										}
+									},
+									tooltip: {
+										trigger: 'item',
+										formatter: '{a} <br/>{b} : {c} ({d}%)'
+									},
+									series: [
+										{
+											name: '通断电比较',
+											type: 'pie',
+											radius: '55%',
+											data: [
+												{ value: powerOnCount, name: '通电' },
+												{ value: powerOffCount, name: '断电' }
+											]
+										}
+									]
+								});
 
-							myChart.setOption({
-								series: [
-									{
-										name: '访问来源',
-										type: 'pie',
-										radius: '55%',
-										data: [
-											{ value: 235, name: '视频广告' },
-											{ value: 274, name: '联盟广告' },
-											{ value: 310, name: '邮件营销' },
-											{ value: 335, name: '直接访问' },
-											{ value: 400, name: '搜索引擎' }
-										]
-									}
-								]
-							});
-
-							// 使用刚指定的配置项和数据显示图表。
-							myChart.setOption(option);
+								// 使用刚指定的配置项和数据显示图表。
+								myChart.setOption(option);
+							}
 						}
 					});
 				}
@@ -232,105 +257,5 @@
 			}
 		});
 	</script>
-	@*
-		<script type="text/javascript">
-			layui.use('laydate', function () {
-				var laydate = layui.laydate;
-
-				laydate.render({
-					elem: '#dateMin',
-					type: 'datetime',
-					format: 'yyyy-MM-dd HH:mm:ss'
-				});
-				laydate.render({
-					elem: '#dateMax',
-					type: 'datetime',
-					format: 'yyyy-MM-dd HH:mm:ss'
-				});
-			});
-
-			layui.use('table', function () {
-				var table = layui.table;
-				table.render({
-					elem: '#test'
-					, id: 'exportTable'
-					, title: '数据读取状况变化'
-					, toolbar: '#toolbar01'
-					, url: '/PowerOnAndOff/LoadData'
-					, where: {
-						dateMin: '@Model.DateMin',
-						dateMax: '@Model.DateMax'
-					}
-					//, cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-					, cols: [[
-					{ field: 'ID', title: 'ID',visible:false, sort: true }
-					,{ field: 'boxID', title: '花篮编号',sort: true }
-					, { field: 'traceID', title: '追溯编号', sort: true }
-					, { field: 'craftName', title: '工艺名称' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
-					, { field: 'deviceName', title: '设备名称', sort: true}
-					, { field: 'rfidStationName', title: 'RFID',align:'center' }
-					, { field: 'createDate', title: '过站时间' }
-				]]
-				, page: true
-				, done:function(res, curr, count) {
-
-				}
-			 });
-
-		});
-
-		layui.use(['jquery', 'excel', 'layer'], function() {
-				var $ = layui.jquery;
-				var excel = layui.excel;
-				$('#export').on('click', function(){
-					$.ajax({
-						url: '/NewDataChange/ExportFile'
-						,dataType: 'json'
-						,data:{
-							 dateMin:'@Model.DateMin',
-							 dateMax:'@Model.DateMax'
-						},
-						success: function(res) {
-							// 假如返回的 res.data 是需要导出的列表数据
-							//console.log(res.data);// [{name: 'wang', age: 18, sex: '男'}, {name: 'layui', age: 3, sex: '女'}]
-							// 1. 数组头部新增表头
-							res.unshift(
-									{
-										no: '编号',
-										craftName: '机台',
-										 deviceName: '设备名',
-										 rfidName: '站点'
-										 , obtCnt: '光电数量'
-										 , obtWithoutRfid: '有光电没有RFID'
-										 , obtShortImpuls: '光电短触发'
-										 , rfidWithoutOBT: '有RFID没有光电'
-										 , rfidCnt: 'RFID计数'
-										 , cntDiff: '计数差异'
-										 , missCnt: '漏读数'
-										 , successPercenter: '成功率'
-									});
-							// 2. 如果需要调整顺序，请执行梳理函数
-							// var data = excel.filterExportData(res.data, [
-							// 	'name',
-							// 	'sex',
-							// 	'age',
-							// ]);
-							// 3. 执行导出函数，系统会弹出弹框
-							excel.exportExcel({
-								sheet1: res
-							}, '数据读取状况变化.xlsx', 'xlsx');
-						}
-					});
-				});
-
-			});
-
-		layui.use(['form','upload'],function() {
-		  var form = layui.form //获取form模块
-		  ,$ = layui.jquery;
-
-		});
-		</script>
-	*@
 </body>
 </html>

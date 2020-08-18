@@ -1,0 +1,148 @@
+﻿@{
+	Layout = null;
+	ViewData["Title"] = "漏读详情";
+}
+
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title></title>
+	<link href="~/lib/layui/css/layui.css" rel="stylesheet" />
+</head>
+<body>
+	<form class="layui-form" lay-filter="formTest">
+		<div class="layui-form-item" id="app">
+			<div class="layui-inline">
+				<label class="layui-form-label">条件</label>
+			</div>
+			<div class="layui-inline">
+				<div class="layui-input-inline">
+					<input class="layui-input" id="dateMin" type="text" v-model="dateMin" lay-filter="DateMin" placeholder="开始时间" autocomplete="off">
+				</div>
+				<div class="layui-input-inline">
+					<input class="layui-input" id="dateMax" type="text" v-model="dateMax" lay-filter="DateMax" placeholder="结束时间" autocomplete="off">
+				</div>
+			</div>
+			<div class="layui-inline">
+				<input class="layui-btn layui-btn-primary" lay-submit type="button" v-on:click="search" value="查询" />
+			</div>
+			<div class="layui-inline">
+				<input class="layui-btn layui-btn-primary" lay-submit type="button" v-on:click="exportData" value="导出" />
+			</div>
+		</div>
+	</form>
+	<table class="layui-hide" id="test"></table>
+
+	<script type="text/html" id="toolbar01">
+
+		<input class="text" style="height:30px;width:157px;" name="" id="">
+
+		<a id="" lay-filter="" style="position: absolute;left: 144px;">
+
+			<i class="layui-icon layui-icon-search" style="background:#fff;padding:5px;"></i>
+
+		</a>
+
+	</script>
+
+	<script src="~/lib/jquery/dist/jquery.js"></script>
+	<script src="~/lib/layui/layui.js"></script>
+	<script src="~/lib/layui/layui_exts/excel.js"></script>
+	<script src="~/lib/vue/vue.js"></script>
+
+	<script>
+		var app = new Vue({
+			el: '#app',
+			data: {
+				dateMin: '',
+				dateMax: '',
+				layui: {
+					layer: null,
+					table: null,
+					laydate: null,
+					form: null
+				}
+			},
+			created: function () {
+				var _this = this;
+				_this.initLayui();
+			},
+			methods: {
+				initLayui: function () {
+					var self = this;
+					layui.use(['laydate', 'table', 'form'], function () {
+						self.laydate = layui.laydate;
+						self.dateRender(self.laydate, ['#dateMax', '#dateMin']);
+
+						self.table = layui.table;
+						self.tableRender(self.table, 0);
+
+						self.form = layui.form;
+						self.form.on("submit(dateMin)",
+							function (data) {
+								self.dateMin = data.value;
+							});
+						self.form.on("submit(dateMax)",
+							function (data) {
+								self.dateMax = data.value;
+							});
+					});
+				},
+				dateRender: function (laydate, elems) {
+					for (i = 0; i < elems.length; i++) {
+						laydate.render({
+							elem: elems[i],
+							type: 'datetime',
+							format: 'yyyy-MM-dd HH:mm:ss'
+						});
+					}
+				},
+				tableRender: function (table, isExprot) {
+					var self = this;
+
+					self.dateMin = $("#dateMin").val();
+					self.dateMax = $("#dateMax").val();
+					table.render({
+						elem: '#test'
+						, id: 'exportTable'
+						, title: '漏读数量'
+						, toolbar: '#toolbar01'
+						, url: '/NoReadRecordDetails/LoadData'
+						, where: {
+							dateMin: self.dateMin,
+							dateMax: self.dateMax,
+							isExprot: isExprot
+						}
+						//, cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+						, cols: [[
+							{ field: 'craftTame', title: '工艺名称', sort: true }
+							, { field: 'deviceName', title: '设备名', sort: true }
+							, { field: 'rfidStationName', title: 'RFID', align: 'center' }
+							, { field: 'missingCount', title: '漏读数量' }
+						]]
+						, page: true
+						, done: function (res, curr, count) {
+
+						}
+					});
+				},
+				search: function () {
+					var self = this;
+					self.tableRender(self.table);
+
+				},
+				exportData: function (d) {
+					var self = this;
+					self.tableRender(self.table, 1);
+				}
+			},
+			updated: function () {
+				var _this = this;
+				if (_this.form) {
+					_this.form.render();
+				}
+			}
+		});
+	</script>
+</body>
+</html>

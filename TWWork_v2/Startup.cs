@@ -44,6 +44,7 @@ namespace TWWork_v2
 			services.AddScoped<ITableInfoRepository, TableInfoRepository>();
 			services.AddScoped<IRetrospectiveInquiryRepository, RetrospectiveInquiryRepository>();
 			services.AddScoped<Idev_TraceRecordRepository, dev_TraceRecordRepository>();
+			services.AddScoped<Idev_MissingRecordRepository, dev_MissingRecordRepository>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
