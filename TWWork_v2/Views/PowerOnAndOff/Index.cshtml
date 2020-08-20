@@ -12,60 +12,46 @@
 	<link href="~/lib/layui/css/layui.css" rel="stylesheet" />
 </head>
 <body>
-	<form class="layui-form">
-		<div class="layui-form-item" id="app">
-			<div class="layui-inline">
-				<label class="layui-form-label">条件</label>
+	<div id="app">
+		<form class="layui-form">
+			<div class="layui-form-item">
+				<div class="layui-inline">
+					<label class="layui-form-label">条件</label>
+				</div>
+				<div class="layui-inline">
+					<div class="layui-input-inline">
+						<input v-model="dateMin" class="layui-input" id="dateMin" type="text" placeholder="开始时间" autocomplete="off">
+					</div>
+					<div class="layui-input-inline">
+						<input v-model="dateMax" class="layui-input" id="dateMax" type="text" placeholder="结束时间" autocomplete="off">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<input class="layui-btn layui-btn-primary" type="button" v-on:click="searchData" value="查询" />
+				</div>
+				@*<div class="layui-inline">
+						<input class="layui-btn layui-btn-primary" type="button" id="export" value="导出" />
+					</div>*@
 			</div>
-			<div class="layui-inline">
-				<div class="layui-input-inline">
-					<input v-model="dateMin" class="layui-input" id="dateMin" type="text" placeholder="开始时间" autocomplete="off">
-				</div>
-				<div class="layui-input-inline">
-					<input v-model="dateMax" class="layui-input" id="dateMax" type="text" placeholder="结束时间" autocomplete="off">
-				</div>
-				<div class="layui-input-inline">
-					<select id="craftName" lay-verify="required" lay-filter="craftName" v-model="craft">
-						<option value="">default</option>
-						<option value="ZR">清洗制绒</option>
-						<option value="KS">扩散</option>
-						<option value="SE">激光SE</option>
-						<option value="KES">刻蚀</option>
-						<option value="TH">退火</option>
-						<option value="WD">背钝化</option>
-						<option value="ZM">正镀膜</option>
-						<option value="BM">背镀膜</option>
-						<option value="SJ">丝网</option>
-					</select>
-				</div>
-				<div class="layui-input-inline">
-					<select id="productionLine" lay-verify="required" lay-filter="productionLine" v-model="productionLine">
-						<option v-for="option in loadProductionLine" v-bind:value="option.value">	{{ option.text }}</option>
-					</select>
+		</form>
+
+		<div style="padding: 20px; background-color: #F2F2F2;" v-for="option in options">
+			<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+				<legend>{{ option.Name }}</legend>
+			</fieldset>
+			<div class="layui-row layui-col-space15">
+				<div class="layui-col-md1" v-for="item in option.Items">
+					<div class="layui-card">
+						<div class="layui-card-header">{{ item.SiteNo }}#</div>
+						<div class="layui-card-body">
+							IN:{{ item.InPowerOnPercent }}<br>
+							OUT:{{ item.OutPowerOnPercent }}
+						</div>
+					</div>
 				</div>
 			</div>
-			<div class="layui-inline">
-				<input class="layui-btn layui-btn-primary" type="button" v-on:click="searchData" value="查询" />
-			</div>
-			@*<div class="layui-inline">
-					<input class="layui-btn layui-btn-primary" type="button" id="export" value="导出" />
-				</div>*@
 		</div>
-	</form>
-	<table class="layui-hide" id="test"></table>
-	<div id="main" style="width: 600px;height:400px;"></div>
-
-	<script type="text/html" id="toolbar01">
-
-		<input class="text" style="height:30px;width:157px;" name="" id="">
-
-		<a id="" lay-filter="" style="position: absolute;left: 144px;">
-
-			<i class="layui-icon layui-icon-search" style="background:#fff;padding:5px;"></i>
-
-		</a>
-
-	</script>
+	</div>
 
 	<script src="~/lib/vue/vue.js"></script>
 	<script src="~/lib/jquery/dist/jquery.js"></script>
@@ -79,88 +65,25 @@
 			data: {
 				dateMax: '',
 				dateMin: '',
-				craft: '',
-				productionLine: '',
-				options: [],
-				layui: {
-					layer: null,
-					table: null,
-					laydate: null,
-					form: null
-				}
+				options: []
 			},
 			created: function () {
 				var _this = this;
 				_this.initLayui();
 			},
 			computed: {
-				loadProductionLine: function () {
-					var self = this;
-					console.log(self.craft);
-					switch (self.craft) {
-						case "SE":
-						case "ZR":
-							self.options = self.createOptions(9);
-							break;
-						case "TH":
-						case "KS":
-							self.options = self.createOptions(6);
-							break;
-						case "KES":
-							self.options = self.createOptions(12);
-							break;
-						case "WD":
-							self.options = self.createOptions(7);
-							break;
-						case "SJ":
-							self.options = self.createOptions(8);
-							break;
-						case "BM":
-							self.options = self.createOptions(16);
-							break;
-						case "ZM":
-							self.options = self.createOptions(15);
-							break;
-						default:
-							self.options = [{ text: '', value: '' }];
-					}
-					self.dateMin = $("#dateMin").val();
-					self.dateMax = $("#dateMax").val();
-					return self.options;
-				}
+
 			},
 			methods: {
-				createOptions: function (len) {
-					var options = [];
-					for (i = 1; i <= len; i++) {
-						var jsonObj = { text: i, value: '4-' + i };
-						options.push(jsonObj);
-					}
-					return options;
-				},
 				initLayui: function () {
 					var self = this;
-					layui.use(['laydate', 'table', 'form'], function () {
+					layui.use(['laydate', 'form'], function () {
 						self.laydate = layui.laydate;
 						self.dateRender(self.laydate, ['#dateMax', '#dateMin']);
 
-						self.table = layui.table;
-						self.tableRender(self.table, 0);
-
 						self.form = layui.form;
-						self.form.on("select(craftName)",
-							function (data) {
-								self.craft = data.value;
-							});
-						//self.form.on("select(productionLine)",
-						//	function (data) {
-						//		self.productionLine = data.value;
-						//	});
+
 					});
-				},
-				searchData: function () {
-					var self = this;
-					self.tableRender(self.table, 1);
 				},
 				dateRender: function (laydate, elems) {
 					var self = this;
@@ -178,73 +101,26 @@
 						});
 					}
 				},
-				tableRender: function (table, tag) {
+				searchData: function () {
 					var self = this;
 					self.dateMin = $("#dateMin").val();
 					self.dateMax = $("#dateMax").val();
-					self.productionLine = $("#productionLine").val();
-					table.render({
-						elem: '#test'
-						, id: 'exportTable'
-						, title: '数据读取状况变化'
-						, toolbar: '#toolbar01'
-						, url: '/PowerOnAndOff/LoadData'
-						, where: {
+					$.ajax({
+						url: '/PowerOnAndOff/LoadData',
+						method: 'post',
+						dataType: 'JSON',
+						//如果发送的是post请求，可以把请求体放在data对象这里
+						data: {
 							dateMin: self.dateMin,
-							dateMax: self.dateMax,
-							craftName: self.craft,
-							productionLine: self.productionLine,
-							tag: tag
-						}
-						//, cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-						, cols: [[
-							{ field: 'id', title: 'ID', hide: true, sort: true }
-							, { field: 'boxid', title: '花篮编号', sort: true }
-							, { field: 'traceid', title: '追溯编号', sort: true }
-							, { field: 'craftname', title: '工艺名称' } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
-							, { field: 'deviceName', title: '设备名称', sort: true }
-							, { field: 'rfidstationname', title: 'RFID', align: 'center' }
-							, { field: 'createdate', title: '过站时间' }
-						]]
-						, page: true
-						, done: function (res, curr, count) {
-							if (res.data.length > 0) {
-								var powerOnOff = res.powerOnOffCount;
-								var powerOnCount = powerOnOff.onCount;
-								var powerOffCount = powerOnOff.offCount;
+							dateMax:self.dateMax
+						},
+						success: function (res) {
+							//console.log(res)
+							self.options = JSON.parse(res);
 
-								// 基于准备好的dom，初始化echarts实例
-								var myChart = echarts.init(document.getElementById('main'));
-
-								var option = myChart.setOption({
-									title: {
-										text: '通断对比图',
-										left: 'center',
-										top: 20,
-										textStyle: {
-											color: '#ccc'
-										}
-									},
-									tooltip: {
-										trigger: 'item',
-										formatter: '{a} <br/>{b} : {c} ({d}%)'
-									},
-									series: [
-										{
-											name: '通断电比较',
-											type: 'pie',
-											radius: '55%',
-											data: [
-												{ value: powerOnCount, name: '通电' },
-												{ value: powerOffCount, name: '断电' }
-											]
-										}
-									]
-								});
-
-								// 使用刚指定的配置项和数据显示图表。
-								myChart.setOption(option);
-							}
+						},
+						error: function () {
+							console.log('请求出错');
 						}
 					});
 				}

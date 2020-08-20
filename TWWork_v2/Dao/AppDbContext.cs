@@ -34,5 +34,6 @@ namespace TWWork_v2.Dao
 		public DbSet<RetrospectiveInquiry> RetrospectiveInquiries { get; set; }
 		//public DbSet<dev_MissingRecord> dev_MissingRecords { get; set; }
 		public DbSet<dev_TraceRecord> dev_TraceRecords { get; set; }
+		public DbSet<DevTraceRecord> DevTraceRecords { get; set; }
 	}
 }

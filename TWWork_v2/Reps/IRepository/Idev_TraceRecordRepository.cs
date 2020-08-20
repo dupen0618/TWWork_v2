@@ -8,6 +8,7 @@ namespace TWWork_v2.Reps.IRepository
 {
 	public interface Idev_TraceRecordRepository
 	{
-		List<dev_TraceRecord> GetDev_TraceRecords(string datemin,string datemax,string craftName);
+		List<dev_TraceRecord> GetDev_TraceRecords(string datemin, string datemax, string craftName);
+		List<DevTraceRecord> FindDevTraceRecordsByDate(string datemin, string datemax);
 	}
 }
